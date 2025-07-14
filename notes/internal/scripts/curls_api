@@ -1,6 +1,6 @@
 # Создание новой заметки
 curl -X POST "http://localhost:8103/notes/note" \
-     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTIxMjkyNDcsImlhdCI6MTc1MjA0Mjg0NywiaWQiOjMsInR5cGUiOiJhY2Nlc3NUb2tlbiJ9.q5Js8JbfLhPVOzWPir6BCPz-S-9EC1JAaA4F0KKgU0Q" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI2MDYxMzAsImlhdCI6MTc1MjUxOTczMCwiaWQiOjQsInR5cGUiOiJhY2Nlc3NUb2tlbiJ9.C4Lvd31O2iUMYA1MDWIbwgM21hbx4-058_3Jc4JWaVo" \
      -H "Content-Type: application/json" \
      -d '{"name":"Test Note2","content":"Test Content2"}' \
      -w "\nStatus: %{http_code}\n"

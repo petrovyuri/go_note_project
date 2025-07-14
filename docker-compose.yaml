@@ -70,8 +70,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     image: mongo:5.0.25
-    ports:
-      - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
        - db_notes_vol:/data/db
     restart: always
@@ -106,9 +104,6 @@ services:
     image: redis:7.2.4
     # Команда для запуска Redis с паролем
     command: redis-server --requirepass ${REDIS_PASSWORD}
-    # Порты, которые будут использоваться в контейнере
-    ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
     environment:
       # Переменные окружения для Redis
       REDIS_PASSWORD: ${REDIS_PASSWORD}
@@ -123,6 +118,35 @@ services:
     depends_on:
       - db_notes
 
+  notes:
+    container_name: notes
+    build:
+      context: .
+      dockerfile: ./notes/Dockerfile
+    ports:
+      - ${NOTES_PORT}:${NOTES_PORT}
+    environment:
+      PORT: ${NOTES_PORT}
+      HOST: ${NOTES_HOST}
+      MONGO_INITDB_HOST: ${MONGO_HOST}
+      MONGO_INITDB_PORT: ${MONGO_PORT}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_USE_SSL: ${MONGO_USE_SSL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      SERVER_TIMEOUT: ${SERVER_TIMEOUT}
+      DB_COLLECTION: ${DB_COLLECTION}
+      DB_TIMEOUT: ${DB_TIMEOUT}
+    depends_on:
+      - db_notes
+      - redis_notes
+    restart: always
+    networks:
+      - notes_net
 
 networks:
   notes_net:
