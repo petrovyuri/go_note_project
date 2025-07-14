@@ -34,12 +34,7 @@ LOGIN_STATUS=$(curl -X "POST" "$AUTH_BASE_URL/login" \
 echo "📊 HTTP Статус: $LOGIN_STATUS"
 
 # Извлекаем токен из JSON ответа (поле "access_token")
-# Используем jq для более надежного парсинга JSON, если недоступен - используем grep
-if command -v jq &> /dev/null; then
-    TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.access_token')
-else
-    TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
-fi
+TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
 # Удаляем возможные переносы строк и пробелы
 TOKEN=$(echo "$TOKEN" | tr -d '\n\r ' | xargs)
 echo "Извлеченный токен: $TOKEN"
@@ -53,11 +48,15 @@ echo ""
 echo "🔍 Создание новой заметки"
 echo "Запрос: POST $BASE_URL/note"
 echo "Ответ:"
-curl -X "POST" "$BASE_URL/note" \
+CREATE_RESPONSE=$(curl -X "POST" "$BASE_URL/note" \
      -H "Authorization: Bearer $TOKEN" \
      -H "Content-Type: application/json" \
-     -d '{"name":"Test Note","content":"Test Content","author_id":1}' \
-     -w "\n📊 HTTP Статус: %{http_code}\n"
+     -d '{"name":"Test Note","content":"Test Content"}' \
+     -w "\n📊 HTTP Статус: %{http_code}\n")
+     
+# Извлекаем ID созданной заметки из ответа
+ID_NOTE=$(echo "$CREATE_RESPONSE" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+echo "ID созданной заметки: $ID_NOTE"
 echo "-------------------------------------------"
 
 # Небольшая пауза между запросами
@@ -78,9 +77,9 @@ sleep 2
 # Тест 3: Получение заметки по ID
 echo ""
 echo "🔍 Получение заметки по ID"
-echo "Запрос: GET $BASE_URL/note/1"
+echo "Запрос: GET $BASE_URL/note/$ID_NOTE"
 echo "Ответ:"
-curl -X "GET" "$BASE_URL/note/1" \
+curl -X "GET" "$BASE_URL/note/$ID_NOTE" \
      -H "Authorization: Bearer $TOKEN" \
      -H "Content-Type: application/json" \
      -w "\n📊 HTTP Статус: %{http_code}\n"
@@ -91,9 +90,9 @@ sleep 2
 # Тест 4: Редактирование заметки по ID
 echo ""
 echo "🔍 Редактирование заметки по ID"
-echo "Запрос: PUT $BASE_URL/note/1"
+echo "Запрос: PUT $BASE_URL/note/$ID_NOTE"
 echo "Ответ:"
-curl -X "PUT" "$BASE_URL/note/1" \
+curl -X "PUT" "$BASE_URL/note/$ID_NOTE" \
      -H "Authorization: Bearer $TOKEN" \
      -H "Content-Type: application/json" \
      -d '{"name":"Updated Note","content":"Updated Content"}' \
@@ -105,9 +104,9 @@ sleep 2
 # Тест 5: Удаление заметки по ID
 echo ""
 echo "🔍 Удаление заметки по ID"
-echo "Запрос: DELETE $BASE_URL/note/1"
+echo "Запрос: DELETE $BASE_URL/note/$ID_NOTE"
 echo "Ответ:"
-curl -X "DELETE" "$BASE_URL/note/1" \
+curl -X "DELETE" "$BASE_URL/note/$ID_NOTE" \
      -H "Authorization: Bearer $TOKEN" \
      -H "Content-Type: application/json" \
      -w "\n📊 HTTP Статус: %{http_code}\n"
