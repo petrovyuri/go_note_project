@@ -2,8 +2,10 @@ package server
 
 import (
 	"auth/internal/config"
+	"auth/internal/errors"
 	"auth/internal/handler"
 	"auth/internal/routes"
+	"auth/internal/service"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -23,8 +25,14 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("конфигурация сервера не может быть nil")
 	}
-	// Создаем новый экземпляр обработчика
-	handler := handler.NewHandler(cfg)
+	service, err := service.NewService(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", errors.ErrServiceCreation, err)
+	}
+
+	// Создаем новый экземпляр обработчика с базой данных и конфигурацией
+	handler := handler.NewHandler(service, cfg)
+
 	// Проверяем, что обработчик успешно создан
 	if handler == nil {
 		return nil, fmt.Errorf("не удалось создать обработчик сервера")
