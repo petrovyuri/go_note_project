@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"notes/internal/config"
+	"notes/internal/handler"
 )
 
 // Структура сервера
@@ -14,7 +15,19 @@ type Server struct {
 
 // NewServer - конструктор сервера
 func NewServer(cfg *config.Config) (*Server, error) {
+	// Проверяем, что конфигурация не пустая
+	if cfg == nil {
+		return nil, fmt.Errorf("конфигурация сервера не может быть nil")
+	}
+	// Создаем новый экземпляр обработчика
+	handler := handler.NewHandler(cfg)
+	// Проверяем, что обработчик успешно создан
+	if handler == nil {
+		return nil, fmt.Errorf("не удалось создать обработчик сервера")
+	}
+	fmt.Println("Обработчик сервера успешно создан")
 
+	// Создаем новый экземпляр сервера
 	return &Server{
 		cfg: cfg,
 	}, nil
